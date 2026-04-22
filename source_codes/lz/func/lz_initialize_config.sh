@@ -1,5 +1,5 @@
 #!/bin/sh
-# lz_initialize_config.sh v4.7.8
+# lz_initialize_config.sh v4.7.9
 # By LZ 妙妙呜 (larsonzhang@gmail.com)
 
 ## 初始化脚本配置
@@ -1568,13 +1568,19 @@ lz_full_data_backup() {
 ##     全局常量及变量
 ## 返回值：无
 lz_backup_data_changed() {
-    eval "$( eval "$( echo "${param_list}" | sed -n "/^all_foreign_wan_port$/,/^custom_dualwan_scripts_filename$/{
-            s/^[[:alnum:]_]\+$/echo \"& \${local_&_changed}\"/;p
-        }" )" | awk -v x="0" '$2 == "1" {
-            x++;
-            printf " -e \"s|^[[:space:]]\*lz_config_%s=\${local_ini_%s}|lz_config_%s=\${local_%s}|\"",$1,$1,$1,$1;
-        } END{if (x != "0") printf "\n";}' \
-        | awk -v fname="${PATH_CONFIGS}/lz_rule_config.box" 'NF != "0" {print "sed -i"$0" "fname}' )"
+    eval "$( echo "${param_list}" | sed -n "/^all_foreign_wan_port$/,/^custom_dualwan_scripts_filename$/{
+            s/^[[:alnum:]_]\+$/echo \"& \${local_&_changed} \${local_ini_&} \${local_&}\"/;p
+        }" )" \
+    | awk -v fname="${PATH_CONFIGS}/lz_rule_config.box" -v str="" '$2 == "1" {
+        if ($3 ~ /\*/ && ($1 == "ruid_timer_hour" || $1 == "ruid_timer_min"))
+            str = str " -e \"s|^[[:space:]]*lz_config_" $1 "=[[:alnum:]_\\*]\\+|lz_config_" $1 "=" $4 "|\"";
+        else
+            str = str " -e \"s|^[[:space:]]*lz_config_" $1 "=" $3 "|lz_config_" $1 "=" $4 "|\"";
+    } END{if (str != "") {
+            str = "sed -i" str " " fname;
+            system(str);
+        }
+    }'
 }
 
 ## 恢复备份配置参数函数
@@ -1896,7 +1902,7 @@ lz_get_box_data() {
 lz_get_cfg_changed() {
     eval "$( eval "$( echo "${param_list}" | sed -n "/^all_foreign_wan_port$/,/^custom_dualwan_scripts_filename$/{
             s/^[[:alnum:]_]\+$/echo \"& \${local_ini_&} \${local_&}\"/;p}" )" \
-        | awk -v x="0" '$2 != $3 {x++; print "local_"$1"_changed=\"1\"";} \
+        | awk -v x="0" '{if ($2 != $3) {x++; print "local_"$1"_changed=\"1\"";} else print "local_"$1"_changed=\"0\"";} \
             END{if (x > 0) print "local_changed=\"1\"";}' )"
 }
 

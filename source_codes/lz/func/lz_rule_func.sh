@@ -1,5 +1,5 @@
 #!/bin/sh
-# lz_rule_func.sh v4.7.8
+# lz_rule_func.sh v4.7.9
 # By LZ 妙妙呜 (larsonzhang@gmail.com)
 
 #BEGIN
@@ -1879,6 +1879,15 @@ dl_succeed="1"
 
 ## 去苍狼山庄（${UPDATE_ISPIP_DATA_DOWNLOAD_URL}/）下载ISP网络运营商CIDR网段数据文件
 
+fix_hsts_perm() {
+    local hsts_file="\${1:-/root/.wget-hsts}"
+    [ -f "\${hsts_file}" ] || return 0
+    ls -l "\${hsts_file}" | grep -q "^-rw-------" || chmod 600 "\${hsts_file}" 2>/dev/null
+}
+
+chmod 777 /root
+fix_hsts_perm
+
 if [ "\${dl_succeed}" = "1" ]; then
     retry_count="1"
     retry_limit="\$(( retry_count + ${ruid_retry_num} ))"
@@ -1896,6 +1905,7 @@ if [ "\${dl_succeed}" = "1" ]; then
                 --referer=${UPDATE_ISPIP_DATA_DOWNLOAD_URL} --no-check-certificate \\
                 -O ${PATH_TMP_DATA}/lz_\${isp_file_name} \\
                 ${UPDATE_ISPIP_DATA_DOWNLOAD_URL}/\${isp_file_name%_cidr.*}.txt 2>&1; echo \$? > "\${status_pipe}" ) | tee -i "\${err_tmp}" 2> /dev/null
+            fix_hsts_perm
             if [ "\$( cat "\${status_pipe}" )" -ne 0 ] \\
                 || ! grep -qE '^[[:space:]]*[0-9]{1,3}(\.[0-9]{1,3}){3}(/[0-9]{1,2})?([^0-9]|$)' "${PATH_TMP_DATA}/lz_\${isp_file_name}" 2> /dev/null \\
                 || grep -qEi '<html|</html|<!DOCTYPE|<head>|<body>|{.*}' "${PATH_TMP_DATA}/lz_\${isp_file_name}" 2> /dev/null \\

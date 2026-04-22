@@ -84,7 +84,7 @@
                     url: '/ext/lzr/LZRGlobal.html',
                     dataType: 'text',
                     success: function(response) {
-                        // v4.7.8
+                        // v4.7.9
                         retVal = (response.match(/QnkgTFog5aaZ5aaZ5ZGc77yI6Juk6J[\+]G5aKp5YS[\/]77yJ/m) != null) ? true : false;
                     }
                 });
@@ -366,14 +366,6 @@
                                                                             <option value="21">21</option>
                                                                             <option value="22">22</option>
                                                                             <option value="23">23</option>
-                                                                            <option value="24">24</option>
-                                                                            <option value="25">25</option>
-                                                                            <option value="26">26</option>
-                                                                            <option value="27">27</option>
-                                                                            <option value="28">28</option>
-                                                                            <option value="29">29</option>
-                                                                            <option value="30">30</option>
-                                                                            <option value="31">31</option>
                                                                         </select> &nbsp;&nbsp;:&nbsp; <select id="lzr_ruid_timer_min" name="lzr_ruid_timer_min" class="input_option" style="margin-left:2px;">
                                                                             <option value="404" selected>自动</option>
                                                                             <option value="0">00</option>
